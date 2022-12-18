@@ -32,7 +32,7 @@ func main() {
 		Width:     screens[0].Bounds.Dx(),
 		Height:    screens[0].Bounds.Dy(),
 		FrameRate: 10,
-		Tune:      "zerolatency",
+		Tune:      "film",
 		Preset:    "ultrafast",
 		Profile:   "baseline",
 		LogLevel:  x264.LogError,
