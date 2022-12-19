@@ -1,18 +1,28 @@
 package screen
 
 import (
+	"bufio"
+	"bytes"
 	"context"
 	"image"
 	"image/color"
 	"time"
 
 	"github.com/kbinani/screenshot"
+	"screenRecorder/x264-go"
 )
 
 type Screen struct {
 	id     int
 	fps    int
 	Bounds image.Rectangle
+	codec  ICodec
+	buff   bytes.Buffer
+}
+
+type ICodec interface {
+	Encode(im image.Image) (err error)
+	Flush() (err error)
 }
 
 func InitDisplays(fps int) (result []*Screen) {
@@ -23,13 +33,14 @@ func InitDisplays(fps int) (result []*Screen) {
 	n := screenshot.NumActiveDisplays()
 	for i := 0; i < n; i++ {
 		result = append(result, &Screen{id: i, fps: fps, Bounds: screenshot.GetDisplayBounds(i)})
+		result[len(result)-1].initCodec()
 	}
 
 	return result
 }
 
-func (s *Screen) StartRecord(ctx context.Context) chan image.Image {
-	result := make(chan image.Image)
+func (s *Screen) StartRecord(ctx context.Context) chan []byte {
+	result := make(chan []byte)
 	go s.start(ctx, result)
 
 	return result
@@ -42,19 +53,22 @@ func (s *Screen) StartRecord(ctx context.Context) chan image.Image {
 	// fmt.Printf("#%d : %v \"%s\"\n", i, bounds, fileName)
 }
 
-func (s *Screen) start(ctx context.Context, out chan image.Image) {
+func (s *Screen) start(ctx context.Context, out chan []byte) {
 	// part := time.After(time.Second)
 
 	for {
 		select {
 		case <-ctx.Done():
+			s.codec.Flush()
 			close(out)
 			return
-		// case <-part:
-		// 	return
 		case <-time.After(time.Millisecond * time.Duration(1000/s.fps)):
 			if img, err := s.makeScreenshot(); err == nil {
-				out <- img
+				err := s.codec.Encode(img)
+				if err == nil {
+					out <- s.buff.Bytes()
+					s.buff.Reset()
+				}
 			}
 		}
 	}
@@ -91,4 +105,19 @@ func convert(original *image.RGBA) *image.YCbCr {
 	}
 
 	return converted
+}
+
+func (s *Screen) initCodec() {
+	opts := &x264.Options{
+		Width:     s.Bounds.Dx(),
+		Height:    s.Bounds.Dy(),
+		FrameRate: 10,
+		Tune:      "film",
+		Preset:    "ultrafast",
+		Profile:   "baseline",
+		LogLevel:  x264.LogError,
+	}
+
+	w := bufio.NewWriter(&s.buff)
+	s.codec, _ = x264.NewEncoder(w, opts)
 }
