@@ -37,7 +37,7 @@ func main() {
 		result[i] = s.StartRecord(ctx)
 	}
 
-	file, err := os.Create("example.264")
+	file, err := os.Create("example.webm")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -74,7 +74,7 @@ func main() {
 	// 	fmt.Sprintf("remote-screen"),
 	// )
 
-	videoTrack, err := webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{MimeType: webrtc.MimeTypeH264}, "video", "pion")
+	videoTrack, err := webrtc.NewTrackLocalStaticSample(webrtc.RTPCodecCapability{MimeType: webrtc.MimeTypeVP8}, "video", "pion")
 	if err != nil {
 		panic(err)
 	}
@@ -115,6 +115,7 @@ func main() {
 
 	var offset int
 	for img := range result[0] {
+		fmt.Println(len(img))
 		stream <- img
 
 		file.WriteAt(img, int64(offset))

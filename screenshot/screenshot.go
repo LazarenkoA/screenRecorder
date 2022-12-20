@@ -4,10 +4,17 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"fmt"
 	"image"
 	"image/color"
+	"log"
+	"os"
 	"time"
 
+	"github.com/at-wat/ebml-go/webm"
+	"golang.org/x/image/vp8"
+
+	"github.com/chai2010/webp"
 	"github.com/kbinani/screenshot"
 	"screenRecorder/x264-go"
 )
@@ -64,11 +71,13 @@ func (s *Screen) start(ctx context.Context, out chan []byte) {
 			return
 		case <-time.After(time.Millisecond * time.Duration(1000/s.fps)):
 			if img, err := s.makeScreenshot(); err == nil {
-				err := s.codec.Encode(img)
-				if err == nil {
-					out <- s.buff.Bytes()
-					s.buff.Reset()
-				}
+				data := Encode(img)
+				out <- data
+				// err := s.codec.Encode(img)
+				// if err == nil {
+				// 	out <- s.buff.Bytes()
+				// 	s.buff.Reset()
+				// }
 			}
 		}
 	}
@@ -84,6 +93,9 @@ func (s *Screen) makeScreenshot() (image.Image, error) {
 	// var b bytes.Buffer
 	// w := bufio.NewWriter(&b)
 	// jpeg.Encode(w, img, &jpeg.Options{Quality: 50})
+
+	dec := vp8.NewDecoder()
+	dec.DecodeFrame()
 
 	return img, err
 	// return convert(img), err
@@ -120,4 +132,41 @@ func (s *Screen) initCodec() {
 
 	w := bufio.NewWriter(&s.buff)
 	s.codec, _ = x264.NewEncoder(w, opts)
+}
+
+func InitWriter(width, height int) webm.BlockWriteCloser {
+	w, err := os.OpenFile("test.webm", os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
+		panic(err)
+	}
+
+	ws, err := webm.NewSimpleBlockWriter(w,
+		[]webm.TrackEntry{
+			{
+				Name:            "Video",
+				TrackNumber:     2,
+				TrackUID:        67890,
+				CodecID:         "V_VP8",
+				TrackType:       1,
+				DefaultDuration: 33333333,
+				Video: &webm.Video{
+					PixelWidth:  uint64(width),
+					PixelHeight: uint64(height),
+				},
+			},
+		})
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("WebM saver has started with video width=%d, height=%d\n", width, height)
+
+	return ws[0]
+}
+
+func Encode(img image.Image) []byte {
+	data, err := webp.EncodeRGB(img, 10)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return data
 }

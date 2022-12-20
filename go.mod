@@ -3,9 +3,15 @@ module screenRecorder
 go 1.18
 
 require (
+	github.com/at-wat/ebml-go v0.16.0
+	github.com/chai2010/webp v1.1.1
 	github.com/gen2brain/x264-go/x264c v0.0.0-20221204084822-82ee2951dea2
 	github.com/gen2brain/x264-go/yuv v0.0.0-20221204084822-82ee2951dea2
 	github.com/kbinani/screenshot v0.0.0-20210720154843-7d3a670d8329
+	github.com/mocukie/webp-go v0.0.0-20201102114413-ec8f0660f293
+	github.com/pion/sdp/v3 v3.0.6
+	github.com/pion/webrtc/v3 v3.1.50
+	golang.org/x/image v0.2.0
 )
 
 require (
@@ -23,17 +29,11 @@ require (
 	github.com/pion/rtcp v1.2.10 // indirect
 	github.com/pion/rtp v1.7.13 // indirect
 	github.com/pion/sctp v1.8.5 // indirect
-	github.com/pion/sdp/v3 v3.0.6 // indirect
 	github.com/pion/srtp/v2 v2.0.10 // indirect
 	github.com/pion/stun v0.3.5 // indirect
 	github.com/pion/transport v0.14.1 // indirect
 	github.com/pion/turn/v2 v2.0.8 // indirect
 	github.com/pion/udp v0.1.1 // indirect
-	github.com/pion/webrtc/v3 v3.1.50 // indirect
-	github.com/pions/dtls v1.0.2 // indirect
-	github.com/pions/pkg v0.0.0-20181115215726-b60cd756f712 // indirect
-	github.com/pions/webrtc v1.2.0 // indirect
-	github.com/pkg/errors v0.8.0 // indirect
 	golang.org/x/crypto v0.0.0-20221010152910-d6f0a8c073c2 // indirect
 	golang.org/x/net v0.3.0 // indirect
 	golang.org/x/sys v0.3.0 // indirect
