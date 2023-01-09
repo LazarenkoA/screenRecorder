@@ -37,7 +37,7 @@ func main() {
 		result[i] = s.StartRecord(ctx)
 	}
 
-	file, err := os.Create("example.webm")
+	file, err := os.Create("example.webp")
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

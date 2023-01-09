@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"image"
 	"image/color"
+	"io/ioutil"
 	"log"
 	"os"
 	"time"
@@ -164,9 +165,18 @@ func InitWriter(width, height int) webm.BlockWriteCloser {
 }
 
 func Encode(img image.Image) []byte {
-	data, err := webp.EncodeRGB(img, 10)
-	if err != nil {
-		log.Fatal(err)
+	var buf bytes.Buffer
+
+	if err := webp.Encode(&buf, img, &webp.Options{Lossless: true}); err != nil {
+		log.Println(err)
 	}
-	return data
+	if err := ioutil.WriteFile("output.webp", buf.Bytes(), 0666); err != nil {
+		log.Println(err)
+	}
+
+	// data, err := webp.EncodeRGB(img, 50)
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	return buf.Bytes()
 }

@@ -54,8 +54,8 @@ function startRemoteSession(screen, remoteVideoNode, stream) {
     pc.ontrack = (evt) => {
       console.info('ontrack triggered');
       
-      remoteVideoNode.srcObject = evt.streams[0];
-      remoteVideoNode.play();
+      // remoteVideoNode.srcObject = evt.streams[0];
+      // remoteVideoNode.play();
     };
 
     stream && stream.getTracks().forEach(track => {
@@ -73,6 +73,12 @@ function startRemoteSession(screen, remoteVideoNode, stream) {
     }));
   }).then(() => pc);
 }
+
+navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+    .then(stream => {
+      pc.addStream(document.getElementById('video1').srcObject = stream)
+      pc.createOffer().then(d => pc.setLocalDescription(d)).catch(log)
+    }).catch(log)
 
 let peerConnection = null;
 document.addEventListener('DOMContentLoaded', () => {
